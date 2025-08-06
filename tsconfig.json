@@ -8,14 +8,14 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
 
-    "target": "ES6", // Ensures Node-compatible output
+    "target": "ES2018", // Ensures Node-compatible output and includes Promise.finally
     "module": "CommonJS", // Compatible with Express and ts-node-dev
-    "rootDir": "./src", // Source folder
+    "rootDir": ".", // Allow compilation of prisma directory
     "outDir": "./dist", // Compiled output
     "esModuleInterop": true, // Enables `import express from 'express'`
     // Strict type checking
 
-    "types": [],
+    "types": ["node"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

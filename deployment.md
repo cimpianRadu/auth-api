@@ -3,12 +3,14 @@
 ## Render Deployment (Recommended)
 
 1. **Create a New Web Service**
+
    - Sign in to Render Dashboard
    - Click "New +" and select "Web Service"
    - Connect your GitHub repository
    - Choose the repository
 
 2. **Configuration**
+
    - Name: `auth-api`
    - Environment: Docker
    - Branch: main
@@ -17,6 +19,7 @@
 
 3. **Environment Variables**
    Add the following environment variables in Render dashboard:
+
    ```
    NODE_ENV=production
    PORT=3000
@@ -26,6 +29,7 @@
    ```
 
 4. **Database Setup**
+
    - Create a new PostgreSQL database in Render
    - Use the provided internal connection string for DATABASE_URL
    - Database migrations will run automatically on deploy

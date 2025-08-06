@@ -25,6 +25,9 @@ model Item {
 model Post {
   id        String   @id @default(cuid())
   title     String
-  content   String
+  body      String
+  author    String
   isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
