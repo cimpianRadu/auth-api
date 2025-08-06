@@ -8,11 +8,14 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm install
+# Install dependencies including devDependencies
+RUN npm install --include=dev
 
 # Generate Prisma client
 RUN npx prisma generate
+
+# Install type definitions
+RUN npm install --save-dev @types/cors
 
 # Bundle app source
 COPY . .

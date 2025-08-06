@@ -27,7 +27,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     try {
       // Verify the session token
-      const { sub: userId } = await verifyToken(sessionToken, { secretKey: process.env.CLERK_SECRET_KEY });
+      const { sub: userId } = await verifyToken(sessionToken, { secretKey: process.env.CLERK_SECRET_KEY || "" });
 
       // Attach user data to request
       (req as any).userId = userId;

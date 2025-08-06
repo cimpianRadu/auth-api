@@ -1,5 +1,40 @@
 # Deployment Guide for Testing Environment
 
+## Render Deployment (Recommended)
+
+1. **Create a New Web Service**
+   - Sign in to Render Dashboard
+   - Click "New +" and select "Web Service"
+   - Connect your GitHub repository
+   - Choose the repository
+
+2. **Configuration**
+   - Name: `auth-api`
+   - Environment: Docker
+   - Branch: main
+   - Region: Frankfurt (EU Central)
+   - Instance Type: Starter (or higher based on needs)
+
+3. **Environment Variables**
+   Add the following environment variables in Render dashboard:
+   ```
+   NODE_ENV=production
+   PORT=3000
+   DATABASE_URL=your_production_database_url
+   CLERK_SECRET_KEY=your_clerk_secret_key
+   CLERK_PUB_KEY=your_clerk_pub_key
+   ```
+
+4. **Database Setup**
+   - Create a new PostgreSQL database in Render
+   - Use the provided internal connection string for DATABASE_URL
+   - Database migrations will run automatically on deploy
+
+5. **Health Checks**
+   Render will automatically monitor your service health at:
+   - Health check path: `/health`
+   - Health check timeout: 30s
+
 ## Prerequisites
 
 1. Node.js (v18 or higher)
