@@ -10,7 +10,7 @@
 
     "target": "ES2018", // Ensures Node-compatible output and includes Promise.finally
     "module": "CommonJS", // Compatible with Express and ts-node-dev
-    "rootDir": "./src", // Source directory
+    "rootDir": ".", // Allow compilation of all TypeScript files
     "outDir": "./dist", // Compiled output
     "esModuleInterop": true, // Enables `import express from 'express'`
     // Strict type checking
