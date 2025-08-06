@@ -23,8 +23,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Remove dev dependencies
+RUN npm prune --production
+
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "deploy:test"]
+CMD ["node", "dist/index.js"]
