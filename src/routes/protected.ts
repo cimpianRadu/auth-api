@@ -41,11 +41,23 @@ router.get("/items", requireAuth, async (req: Request, res: Response) => {
     res.json({ items });
   } catch (error) {
     console.error("Error fetching items:", error);
-    res.status(500).json({ message: "Error fetching items" });
+
+    // Check if it's a connection error
+    if (error instanceof Error && error.message.includes("Can't reach database server")) {
+      return res.status(503).json({
+        message: "Database connection error. Please try again later.",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+
+    res.status(500).json({
+      message: "Error fetching items",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 });
 
-router.post("/items", requireAuth, async (req: Request, res: Response) => {
+router.post("/create-item", requireAuth, async (req: Request, res: Response) => {
   const { title, content } = req.body;
 
   try {
