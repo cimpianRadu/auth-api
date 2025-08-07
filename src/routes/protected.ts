@@ -50,9 +50,10 @@ router.get("/items", requireAuth, async (req: Request, res: Response) => {
       });
     }
 
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     res.status(500).json({
       message: "Error fetching items",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      error: process.env.NODE_ENV === "development" ? errorMessage : undefined,
     });
   }
 });
@@ -84,7 +85,19 @@ router.post("/create-item", requireAuth, async (req: Request, res: Response) => 
     res.status(201).json({ item: newItem });
   } catch (error) {
     console.error("Error creating item:", error);
-    res.status(500).json({ message: "Error creating item" });
+
+    if (error instanceof Error && error.message.includes("Can't reach database server")) {
+      return res.status(503).json({
+        message: "Database connection error. Please try again later.",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({
+      message: "Error creating item",
+      error: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+    });
   }
 });
 
