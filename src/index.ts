@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import publicRouter from "./routes/public";
 import protectedRouter from "./routes/protected";
 import healthRouter from "./routes/health";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
@@ -17,6 +18,14 @@ app.use(express.json());
 app.use("/", healthRouter); // Health check route should be at root level
 app.use("/public", publicRouter);
 app.use("/protected", protectedRouter);
+
+// Error handling middleware should be last
+app.use(errorHandler);
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 const PORT = process.env.PORT || 3000;
 
