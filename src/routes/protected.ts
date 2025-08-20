@@ -99,9 +99,14 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
     email: user.email,
   });
 
-  const ephemeralKey = await stripe.ephemeralKeys.create({
-    customer: customer.id,
-  });
+  const ephemeralKey = await stripe.ephemeralKeys.create(
+    {
+      customer: customer.id,
+    },
+    {
+      apiVersion: "2025-08-20.acacia",
+    }
+  );
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: 1000,
