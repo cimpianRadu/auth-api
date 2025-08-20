@@ -86,6 +86,7 @@ router.delete("/delete-item", requireAuth, async (req: Request, res: Response) =
 });
 
 router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) => {
+  const { userId, userEmail, amount, currency, description, paymentMethod } = req.body;
   const clerkId = (req as any).userId;
   const user = await prisma.user.findUnique({
     where: { clerkId },
@@ -96,7 +97,10 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
   }
 
   const customer = await stripe.customers.create({
-    email: user.email,
+    email: userEmail,
+    metadata: {
+      clerkId,
+    },
   });
 
   const ephemeralKey = await stripe.ephemeralKeys.create(
@@ -109,9 +113,12 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
   );
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: 1000,
-    currency: "usd",
+    amount: amount,
+    currency: currency,
     customer: customer.id,
+    description: description,
+    payment_method: paymentMethod,
+    confirm: true,
   });
 
   res.status(200).json({
