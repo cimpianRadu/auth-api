@@ -104,7 +104,7 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
       customer: customer.id,
     },
     {
-      apiVersion: "2025-08-20.acacia",
+      apiVersion: "2025-04-30.basil",
     }
   );
 
