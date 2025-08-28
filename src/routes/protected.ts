@@ -86,49 +86,104 @@ router.delete("/delete-item", requireAuth, async (req: Request, res: Response) =
 });
 
 router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) => {
-  const { userId, userEmail, amount, currency, description, paymentMethod } = req.body;
-  const clerkId = (req as any).userId;
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-  });
+  try {
+    const { userId, userEmail, amount, currency, description, paymentMethod } = req.body;
+    const clerkId = (req as any).userId;
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  const customer = await stripe.customers.create({
-    email: userEmail,
-    metadata: {
-      clerkId,
-    },
-  });
-
-  const ephemeralKey = await stripe.ephemeralKeys.create(
-    {
-      customer: customer.id,
-    },
-    {
-      apiVersion: "2025-04-30.basil",
+    // Validate required fields
+    if (!userEmail || !amount || !currency || !description) {
+      return res.status(400).json({
+        error: "Missing required fields",
+        message: "userEmail, amount, currency, and description are required",
+      });
     }
-  );
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amount,
-    currency: currency,
-    customer: customer.id,
-    description: description,
-    automatic_payment_methods: {
-      enabled: true,
-      allow_redirects: "never",
-    },
-  });
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+    });
 
-  res.status(200).json({
-    paymentIntent: paymentIntent.client_secret,
-    ephemeralKey: ephemeralKey.secret,
-    customer: customer.id,
-    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-  });
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+        message: "User not found in database",
+      });
+    }
+
+    // Create Stripe customer
+    let customer;
+    try {
+      customer = await stripe.customers.create({
+        email: userEmail,
+        metadata: {
+          clerkId,
+        },
+      });
+    } catch (stripeError: any) {
+      console.error("Stripe customer creation failed:", stripeError);
+      return res.status(400).json({
+        error: "Customer creation failed",
+        message: stripeError.message || "Failed to create customer",
+        stripeError: stripeError.type || "unknown_error",
+      });
+    }
+
+    // Create ephemeral key
+    let ephemeralKey;
+    try {
+      ephemeralKey = await stripe.ephemeralKeys.create(
+        {
+          customer: customer.id,
+        },
+        {
+          apiVersion: "2025-04-30.basil",
+        }
+      );
+    } catch (stripeError: any) {
+      console.error("Stripe ephemeral key creation failed:", stripeError);
+      return res.status(400).json({
+        error: "Ephemeral key creation failed",
+        message: stripeError.message || "Failed to create ephemeral key",
+        stripeError: stripeError.type || "unknown_error",
+      });
+    }
+
+    // Create payment intent
+    let paymentIntent;
+    try {
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: currency,
+        customer: customer.id,
+        description: description,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: "never",
+        },
+      });
+    } catch (stripeError: any) {
+      console.error("Stripe payment intent creation failed:", stripeError);
+      return res.status(400).json({
+        error: "Payment intent creation failed",
+        message: stripeError.message || "Failed to create payment intent",
+        stripeError: stripeError.type || "unknown_error",
+        code: stripeError.code || null,
+      });
+    }
+
+    res.status(200).json({
+      paymentIntent: paymentIntent.client_secret,
+      ephemeralKey: ephemeralKey.secret,
+      customer: customer.id,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+    });
+  } catch (error: any) {
+    console.error("Unexpected error in payment-sheet route:", error);
+    return res.status(500).json({
+      error: "Internal server error",
+      message: "An unexpected error occurred while processing payment",
+      details: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
 });
 
 export default router;
