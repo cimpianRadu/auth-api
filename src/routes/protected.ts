@@ -87,14 +87,14 @@ router.delete("/delete-item", requireAuth, async (req: Request, res: Response) =
 
 router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) => {
   try {
-    const { userId, userEmail, amount, currency, description, paymentMethod } = req.body;
+    const { userId, email, amount, currency, description, paymentMethod } = req.body;
     const clerkId = (req as any).userId;
 
     // Validate required fields
-    if (!userEmail || !amount || !currency || !description) {
+    if (!email || !amount || !currency || !description) {
       return res.status(400).json({
         error: "Missing required fields",
-        message: "userEmail, amount, currency, and description are required",
+        message: "Email, amount, currency, and description are required",
       });
     }
 
@@ -113,7 +113,7 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
     let customer;
     try {
       customer = await stripe.customers.create({
-        email: userEmail,
+        email: email,
         metadata: {
           clerkId,
         },
