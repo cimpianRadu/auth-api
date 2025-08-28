@@ -117,8 +117,10 @@ router.post("/payment-sheet", requireAuth, async (req: Request, res: Response) =
     currency: currency,
     customer: customer.id,
     description: description,
-    payment_method: paymentMethod,
-    confirm: true,
+    automatic_payment_methods: {
+      enabled: true,
+      allow_redirects: "never",
+    },
   });
 
   res.status(200).json({
